@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard — Car Parts App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="bg-dark-glass">
+<nav class="navbar navbar-expand-lg navbar-dark mb-4">
+  <div class="container d-flex justify-content-between align-items-center">
+    <span class="navbar-brand text-white fs-5">🚗 Car Parts App
+      <small class="text-info">{{ username }}</small>
+    </span>
+    <div class="d-flex align-items-center gap-2">
+      <form method="post" class="d-flex align-items-center gap-2">
+        <input type="password" name="switch_password" placeholder="Password" class="form-control form-control-sm" style="max-width:150px" required />
+        <button type="submit" name="toggle_mode" class="btn btn-outline-light btn-sm">
+          {{ 'Switch to View' if edit_mode else 'Switch to Insert' }}
+        </button>
+      </form>
+      <a class="btn btn-outline-info btn-sm" href="{{ url_for('routes_bp.depreciation') }}">Depreciation Calculator</a>
+      <a class="btn btn-outline-danger btn-sm" href="{{ url_for('auth.logout') }}">Logout</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, msg in messages %}
+      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ msg }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  {% endwith %}
+</div>
+
+
+<div class="container my-4">
+  {% if edit_mode %}
+    <div class="glass-container p-4 mb-4">
+      <h4 class="mb-3">Add Car Part</h4>
+      <form method="post">
+        <input name="code" class="form-control glass-input mb-2" placeholder="Code" required>
+        <input name="make_model" class="form-control glass-input mb-2" placeholder="Make/Model" required>
+        <input name="part_name" class="form-control glass-input mb-2" placeholder="Part Name" required>
+        <input type="number" step="0.01" name="price_original" class="form-control glass-input mb-2" placeholder="Original Price">
+        <input name="sourcer" class="form-control glass-input mb-2" placeholder="Sourcer">
+        <button class="btn btn-login w-100">Add Part</button>
+      </form>
+    </div>
+  {% else %}
+    <div class="glass-container p-4">
+      <h4 class="mb-3">View Car Parts</h4>
+      <form method="get" class="row mb-3 g-2">
+        <input name="search" class="form-control glass-input col-md-10" placeholder="Search..." value="{{ request.args.search or '' }}">
+        <button class="btn btn-outline-light col-md-2">Search</button>
+      </form>
+      <div class="table-responsive glass-table">
+        <table class="table text-white mb-0">
+          <thead><tr>
+            <th>ID</th><th>Code</th><th>Model</th><th>Part</th><th>Price</th><th>Sourcer</th><th>Actions</th>
+          </tr></thead>
+          <tbody>
+            {% for p in parts %}
+              <tr>
+                <td>{{ p[0] }}</td>
+                <td>{{ p[1] }}</td>
+                <td>{{ p[2] }}</td>
+                <td>{{ p[3] }}</td>
+                <td>{{ p[4] or '-' }}</td>
+                <td>{{ p[5] or '-' }}</td>
+                <td>
+                  <a href="{{ url_for('routes_bp.edit_part', part_id=p[0]) }}" class="btn btn-primary btn-sm">Edit</a>
+                  <form method="post" action="{{ url_for('routes_bp.delete_part', part_id=p[0]) }}" style="display:inline-block;" onsubmit="return confirm('Delete?');">
+                    <button class="btn btn-danger btn-sm">Delete</button>
+                  </form>
+                </td>
+              </tr>
+            {% else %}
+              <tr><td colspan="7" class="text-center">No parts found.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
